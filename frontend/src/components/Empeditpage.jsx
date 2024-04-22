@@ -27,6 +27,7 @@ const Empeditpage = () => {
     axios.get(`http://localhost:2222/editpage/${params.id}`)
     .then((z) => {
         console.log("start to edit", z);
+        console.log(z.data);
         setname(z.data.name);
         setcourse(z.data.course)
         setmail(z.data.mail);
@@ -35,7 +36,7 @@ const Empeditpage = () => {
         setphoneno(z.data.phoneno);
         setimage(z.data.image)
   
-    })
+    },[])
     .catch((err) => { console.log("wait for edit", err); })
     
    },[])
@@ -65,22 +66,31 @@ const Empeditpage = () => {
     let getdesig=(e)=>{
         setdesig(e.target.value)
     }
-    let getcourse=(e)=>{
-     let {value,checked}=e.target;
-     setcourse((prevcourse) => {
-        if (checked) {
-            // Add the value to the array if it's checked and not already in the array
-            return [...prevcourse, value];
-        } else {
-            // Remove the value from the array if it's unchecked
-            return prevcourse.filter(course => course !== value);
-        }
-    });
+    let getempcourse=(e)=>{
+    //  let {value,checked}=e.target;
+    //  setcourse((prevcourse) => {
+    //     if (checked) {
+    //         // Add the value to the array if it's checked and not already in the array
+    //         return [...prevcourse, value];
+    //     } else {
+    //         // Remove the value from the array if it's unchecked
+    //         return prevcourse.filter(course => course != value);
+    //     }
+    // });
+    let courses= e.target.value
+    if(e.target.checked){
+     setcourse([...course,courses])
+    }
+    else{
+     setcourse(course.filter((x)=>{ return(x!=courses)}))
+    }
    
     }
   
 let getphoneno=(e)=>{
-    setphoneno(e.target.value)
+    if(e.target.value.length<=10){
+        setphoneno(e.target.value)
+    }
     if(e.target.value.length>=10&&e.target.value.match(numberregex)){
         setphonenocolor(true)
     }
@@ -89,8 +99,16 @@ let getphoneno=(e)=>{
     }
 }
 let getimage=(e)=>{
-    console.log(e.target.files[0]);
-      setimage(e.target.files[0])
+    // console.log(e.target.files[0]);
+    let file=e.target.files[0]
+    let filereader=new FileReader()
+    if(file){
+        filereader.readAsDataURL(file)
+        filereader.onload=()=>{
+           let base64string= filereader.result
+           setimage(base64string)
+        }
+    }
   }
 
    let payload={
@@ -100,6 +118,7 @@ let getimage=(e)=>{
    course,
    gender,
    desig,
+   image
 
 
 }
@@ -108,48 +127,27 @@ let stringregex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
 let numberregex=/^[0-9]+$/
 let navigate=useNavigate()
 let update=()=>{
-    console.log(payload);
+    // console.log(payload);
      // console.log(fname,lname,email,gender,role,dob,phoneno,address,company,Salary);
        
-     if(name.length>4&&name.match(stringregex)&&mail.match(emailregex)&&phoneno.match(numberregex)&&phoneno.length==10){
-          
-        const payload1 = new FormData();
-        Object.entries(payload).forEach(([key, value]) => {
-            payload1.append(key, value);
-        });
-        
-        // Append the image separately
-        payload1.append('image', image);
-
-        axios.post(`http://localhost:2222/update/${params.id}`, payload1)
-        .then((res) => { console.log("data updated", res); })
-        .catch((err) => { console.log("data failed to update", err); })
-          navigate("/adminpage")
-       
-      }
-      else{
-        if(name.length>4&&name.match(stringregex)){
-         setnamecolor(true)
-        }
-        else{
-         setnamecolor(false)
-        }
-      
-        if(mail.match(emailregex)){
-         setmailcolor(true)
-        }
-        else{
-         setmailcolor(false)
-        }
     
-        if(phoneno.length==10&&phoneno.match(numberregex)){
-         setphonenocolor(true)
-        }
-        else{
-         setphonenocolor(false)
-        }
-     
-   }
+          
+        // const payload1 = new FormData();
+        // Object.entries(payload).forEach(([key, value]) => {
+        //     payload1.append(key, value);
+        // });
+        
+        // // Append the image separately
+        // payload1.append('image', image);
+
+        axios.post(`http://localhost:2222/update/${params.id}`, payload)
+        .then((res) => { console.log("data updated", res);
+        navigate("/adminpage") })
+        .catch((err) => { console.log("data failed to update", err); })
+       
+       
+      
+    
 }
   return (
     <div id={style.empregpage}>
@@ -161,7 +159,7 @@ let update=()=>{
     <TextField required helperText={mailcolor?"":"please fill the mail"} color={mailcolor?"primary":"error"} value={mail} onChange={getmail} id="outlined-basic" sx={{width:"300px",height:"20px",marginTop:"40px"}} label="Enter your Emailid" variant="outlined" />
  <TextField required helperText={phonenocolor?"":"please fill the phoneno"} color={phonenocolor?"primary":"error"} value={phoneno} onChange={getphoneno} id="outlined-basic" sx={{width:"300px",height:"20px",marginTop:"40px"}} label="Phoneno" variant="outlined" />
  
- <FormGroup sx={{ display: "flex", flexDirection: "row", width: "307px", marginTop: "50px" }}>
+ {/* <FormGroup sx={{ display: "flex", flexDirection: "row", width: "307px", marginTop: "50px" }}>
 <FormLabel>Course:</FormLabel>
 <FormControlLabel
     control={<Checkbox value="MCA" checked={course.includes("MCA")} onChange={getcourse} />}
@@ -175,7 +173,13 @@ let update=()=>{
     control={<Checkbox value="BSC" checked={course.includes("BSC")} onChange={getcourse} />}
     label="BSC"
 />
-</FormGroup>
+</FormGroup> */}
+<div style={{marginTop:"50px"}}>
+<FormLabel>Course:</FormLabel>
+<input type="checkbox" value="MCA" checked={course.includes("MCA")}   onChange={getempcourse}/>MCA
+<input type="checkbox" value="BCA" checked={course.includes("BCA")}    onChange={getempcourse} />BCA
+<input type="checkbox" value="BSC" checked={course.includes("BSC")}   onChange={getempcourse} />BSC
+</div>
   
    <FormControl sx={{marginTop:"10px",display:"flex",marginRight:"20px"}}>
             <FormLabel id="demo-radio-buttons-group-label">Gender :</FormLabel>

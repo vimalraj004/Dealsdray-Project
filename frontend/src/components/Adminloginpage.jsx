@@ -3,6 +3,8 @@ import style from "./Style.module.css"
 import { TextField,Button,FormControl } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import  axios  from 'axios'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -40,13 +42,14 @@ let adminbtn=()=>{
     axios.post("http://localhost:2222/adminlogin",payload)
     .then((res)=>{console.log(res);
                    if(res.data=="usernot found"){
-                    alert("Invalid username")
+                    toast("Invalid username")
                    }
                    else if(res.data.password!=adminpass){
-                    alert("Wrong password")
+                    toast("Wrong password")
                    }
                    else{
                     // navigate(`/staffpage/${res.data._id}`)
+                    localStorage.setItem("entry",true)
                     navigate("/adminpage")
                    }
                   })
@@ -68,7 +71,7 @@ let adminbtn=()=>{
         <TextField value={adminname} onChange={getadminname} id="outlined-basic" sx={{width:"300px",marginTop:"20px",marginLeft:"50px"}} label="Enter your Name" variant="outlined" />
         {/* <TextField value={adminpass} onChange={getadminpass} id="outlined-basic" sx={{width:"300px",marginTop:"20px",marginLeft:"50px"}} label=" Enter your Password" variant="outlined" /> */}
 <FormControl  value={adminpass} onChange={getadminpass} sx={{ m: 1, width: '34ch',marginLeft:"50px",marginTop:"20px" }} variant="outlined">
-      <InputLabel htmlFor="outlined-adornment-password">Enter your Password</InputLabel>
+      <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
       <OutlinedInput
         id="outlined-adornment-password"
         type={showPassword ? 'text' : 'password'}
@@ -89,6 +92,7 @@ let adminbtn=()=>{
 </FormControl>
 
         <Button onClick={adminbtn} variant="contained" sx={{marginTop:"30px",marginLeft:"120px"}}>Admin submit</Button>
+        <ToastContainer/>
         </div>
 
 

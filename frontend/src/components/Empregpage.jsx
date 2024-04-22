@@ -49,7 +49,7 @@ const Empregpage = () => {
     let getdesig=(e)=>{
         setdesig(e.target.value)
     }
-    let getcourse=(e)=>{
+    let getempcourse=(e)=>{
      let {value,checked}=e.target;
      setcourse((prevcourse) => {
         if (checked) {
@@ -57,14 +57,23 @@ const Empregpage = () => {
             return [...prevcourse, value];
         } else {
             // Remove the value from the array if it's unchecked
-            return prevcourse.filter(course => course !== value);
+            return prevcourse.filter(course => course != value);
         }
     });
-   
+//     let courses= e.target.value
+//    if(e.target.checked){
+//     setcourse([...course,courses])
+//    }
+//    else{
+//     setcourse(course.filter((x)=>{ return(x!=courses)}))
+//    }
     }
   
 let getphoneno=(e)=>{
-    setphoneno(e.target.value)
+    if(e.target.value.length<=10){
+        setphoneno(e.target.value)
+    }
+   
     if(e.target.value.length>=10&&e.target.value.match(numberregex)){
         setphonenocolor(true)
     }
@@ -73,8 +82,18 @@ let getphoneno=(e)=>{
     }
 }
 let getimage=(e)=>{
-    console.log(e.target.files[0]);
-      setimage(e.target.files[0])
+  
+  console.log(e.target.files[0]);
+  let file=e.target.files[0]
+  if(file){
+   let fileReader= new FileReader()
+   fileReader.readAsDataURL(file)
+   fileReader.onload=()=>{
+    let base64string=fileReader.result
+    setimage(base64string)
+
+   }
+  }
   }
 
    let payload={
@@ -84,6 +103,7 @@ let getimage=(e)=>{
    course,
    gender,
    desig,
+   image
 
 
 }
@@ -94,26 +114,22 @@ let navigate=useNavigate()
 
 let register=()=>{
     console.log(payload);
-     // console.log(fname,lname,email,gender,role,dob,phoneno,address,company,Salary);
+    //  console.log(fname,lname,email,gender,role,dob,phoneno,address,company,Salary);
        
      if(name.length>4&&name.match(stringregex)&&mail.match(emailregex)&&phoneno.match(numberregex)&&phoneno.length==10){
           
-        const payload1 = new FormData();
-        Object.entries(payload).forEach(([key, value]) => {
-            payload1.append(key, value);
-        });
-        
-        // Append the image separately
-        payload1.append('image', image);
+       
 
-        axios.post("http://localhost:2222/register",payload1) 
+        axios.post("http://localhost:2222/register",payload) 
         .then((res)=>{console.log("data posted",res);
                       // console.log(res.data);
                     if(res.data=="useremail is already in use"){
                       alert("useremail is already in use")
                     }
                   else{
+                    localStorage.removeItem("regentry")
                     navigate("/adminpage")
+
                   }})
         .catch((err)=>{console.log("data failed to post",err);})
        
@@ -152,7 +168,7 @@ let register=()=>{
         <TextField required helperText={mailcolor?"":"please fill the mail"} color={mailcolor?"primary":"error"} value={mail} onChange={getmail} id="outlined-basic" sx={{width:"300px",height:"20px",marginTop:"40px"}} label="Enter your Emailid" variant="outlined" />
      <TextField required helperText={phonenocolor?"":"please fill the Phoneno"} color={phonenocolor?"primary":"error"} value={phoneno} onChange={getphoneno} id="outlined-basic" sx={{width:"300px",height:"20px",marginTop:"40px"}} label="Phoneno" variant="outlined" />
      
-     <FormGroup sx={{ display: "flex", flexDirection: "row", width: "307px", marginTop: "50px" }}>
+     {/* <FormGroup sx={{ display: "flex", flexDirection: "row", width: "307px", marginTop: "50px" }}>
     <FormLabel>Course:</FormLabel>
     <FormControlLabel
         control={<Checkbox value="MCA" checked={course.includes("MCA")} onChange={getcourse} />}
@@ -166,7 +182,13 @@ let register=()=>{
         control={<Checkbox value="BSC" checked={course.includes("BSC")} onChange={getcourse} />}
         label="BSC"
     />
-</FormGroup>
+</FormGroup> */}
+<div style={{marginTop:"50px"}}>
+<FormLabel>Course:</FormLabel>
+<input type="checkbox" value="MCA"   checked={course.includes("MCA")} onChange={getempcourse}/>MCA
+<input type="checkbox" value="BCA"  checked={course.includes("BCA")}   onChange={getempcourse} />BCA
+<input type="checkbox" value="BSC" checked={course.includes("BSC") }  onChange={getempcourse} />BSC
+</div>
       
        <FormControl sx={{marginTop:"10px",display:"flex",marginRight:"20px"}}>
                 <FormLabel id="demo-radio-buttons-group-label">Gender :</FormLabel>
