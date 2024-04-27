@@ -14,9 +14,9 @@ const Adminpage = () => {
 
 
   useEffect(()=>{
-      axios.get("http://localhost:2222/emp")
-      .then((x)=>{console.log("i got the data");
-                  console.log(x);
+      axios.get("http://localhost:2222/emp",{headers:{"Authorization":localStorage.getItem("jwttoken")}})
+      .then((x)=>{
+                  // console.log(x);
                   setdata(x.data)
                   // setimg(x.data[0].img);
                   setrefresh(!refresh)

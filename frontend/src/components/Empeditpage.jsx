@@ -26,8 +26,8 @@ const Empeditpage = () => {
    useEffect(()=>{
     axios.get(`http://localhost:2222/editpage/${params.id}`)
     .then((z) => {
-        console.log("start to edit", z);
-        console.log(z.data);
+        // console.log("start to edit", z);
+        // console.log(z.data);
         setname(z.data.name);
         setcourse(z.data.course)
         setmail(z.data.mail);

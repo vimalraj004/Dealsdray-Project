@@ -1,5 +1,6 @@
 let express=require("express")
 let cors=require("cors")
+let jwt=require("jsonwebtoken")
 let bodyparser=require("body-parser")
 let mongoose=require("mongoose")
 let data=require("./schema/Registerschema")
@@ -8,6 +9,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/dealdrayproject")
 mongoose.connection
 .once("open",()=>{console.log("db connected");})
 .on("err",()=>{console.log("db failed to connect");})
+require("dotenv").config()
 let app=express()
 app.use(express.json({limit:"10mb"}))
 app.use(cors())
@@ -16,36 +18,34 @@ app.use(bodyparser.urlencoded({extended:true}))
 // app.use(express.static('photos'))
 
 // --------------------------------------adminlogin--------------------------
-app.post("/adminlogin",(req,res)=>{
-//     console.log(req.body);
-//    res.end("welcome to server");
-    // console.log(req.body.adminname);
-    data2.findOne({name:req.body.adminname})
-    .then((x)=>{
+app.post("/adminlogin",async(req,res)=>{
+    try{
+        let name=req.body.adminname
+        console.log(name);
+        let pass=req.body.adminpass
+        console.log(pass);
+        let x=await data2.findOne({name:req.body.adminname});
+        console.log(x);
         if(x!=null){
-            res.json(x)
-        }
-        else{
-            res.json("usernot found")
-        }
-    })
-    .catch((err)=>{res.json(err)})
+               if(x.password==req.body.adminpass){
+                   let token=jwt.sign({name:x.adminname,password:x.adminpass},process.env.secret_key)
+                   console.log(process.env.secret_key);
+                   res.status(200).send({token:token})
+               }
+               else{
+                   res.status(200).send({"message":"wrong password"})
+               }
+           }
+       else{
+           res.status(200).send({"message":"user not found"})
+           }
+
+    }
+    catch(err){
+        res.json(err)
+    }
 })
-//--------------------multer-------------------------
-// const multer  = require('multer')
-// const path=require("path")
-// // const { log } = require("console")
-// const storage = multer.diskStorage({
-//     destination:(req, file, cb)=> {
-//       cb(null,"photos/pics")
-//     },
-//     filename:(req, file, cb)=> {
-//      cb(null,file.fieldname + "_" + Date.now() + path.extname(file.originalname))
-//     }
-//   })
-  
-//   const upload = multer({ storage: storage })
- //-----------------------------------multer -------------------
+
 app.post("/register",(req,res)=>{
    console.log(req.body);
   
@@ -70,8 +70,26 @@ app.post("/register",(req,res)=>{
     .catch(()=>{})
 
 })
-app.get("/emp",(req,res)=>{
-    // data.find({$or: [{name:filter}, {email: filter}]})
+function checktoken(req,res,next){
+    let token=req.headers["authorization"]
+    // console.log(token);
+    if(token){
+        jwt.verify(token,process.env.secret_key,(err,decode)=>{
+            if(err){
+                res.status(200).send({message:"tokenerr"})
+                return
+            }
+            else{
+              req.name=  decode.name
+              req.pass=decode.password
+              next()
+            }
+        })
+    }
+
+}
+app.get("/emp",checktoken,(req,res)=>{
+
     data.find()
     .then((x)=>{res.json(x)})
     .catch((err)=>{res.json("failed to get the data from db")})

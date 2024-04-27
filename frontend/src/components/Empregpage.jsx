@@ -83,7 +83,7 @@ let getphoneno=(e)=>{
 }
 let getimage=(e)=>{
   
-  console.log(e.target.files[0]);
+//   console.log(e.target.files[0]);
   let file=e.target.files[0]
   if(file){
    let fileReader= new FileReader()
